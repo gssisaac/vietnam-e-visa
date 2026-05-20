@@ -61,8 +61,10 @@ Dates use **DD/MM/YYYY** format.
 1. Log in to [evisa.gov.vn](https://evisa.gov.vn) and navigate to the foreigners application form
 2. Dismiss the instruction modal manually (first visit only)
 3. Upload portrait and passport photos manually
-4. Click the extension icon → **Fill Form**
+4. Click the extension icon → pick **Intended entry date** → **Fill Form**
 5. Review all fields, upload any remaining items, then click **Next** yourself
+
+The popup entry date overrides `intended_entry_date`, `valid_from`, and `valid_to` (`valid_to` = entry + `length_of_stay_days` from profile).
 
 ## What is filled
 

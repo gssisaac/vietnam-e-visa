@@ -93,8 +93,60 @@ const TARGET_PATH = '/e-visa/foreigners';
     return profile;
   }
 
-  async function handleFillForm() {
-    log().info?.('handleFillForm called');
+  function parseDdMmYyyy(value) {
+    const [day, month, year] = value.split('/').map(Number);
+    return new Date(Date.UTC(year, month - 1, day));
+  }
+
+  function formatDdMmYyyy(date) {
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const year = date.getUTCFullYear();
+    return `${day}/${month}/${year}`;
+  }
+
+  function isoToDdMmYyyy(iso) {
+    const [year, month, day] = iso.split('-');
+    return `${day}/${month}/${year}`;
+  }
+
+  function applyEntryDate(profile, entryDateIso) {
+    if (!entryDateIso) return null;
+
+    const entryDdMmYyyy = isoToDdMmYyyy(entryDateIso);
+    const stayDays = Number.parseInt(profile.trip_information?.length_of_stay_days || '90', 10);
+    const validToDate = parseDdMmYyyy(entryDdMmYyyy);
+    validToDate.setUTCDate(validToDate.getUTCDate() + stayDays - 1);
+    const validToDdMmYyyy = formatDdMmYyyy(validToDate);
+
+    profile.requested_information = profile.requested_information || {};
+    profile.trip_information = profile.trip_information || {};
+
+    profile.requested_information.valid_from = entryDdMmYyyy;
+    profile.requested_information.valid_to = validToDdMmYyyy;
+    profile.trip_information.intended_entry_date = entryDdMmYyyy;
+
+    log().info?.('applied entry date override', {
+      entry: entryDdMmYyyy,
+      validFrom: entryDdMmYyyy,
+      validTo: validToDdMmYyyy,
+      stayDays,
+    });
+
+    return {
+      entry: entryDdMmYyyy,
+      validFrom: entryDdMmYyyy,
+      validTo: validToDdMmYyyy,
+      stayDays,
+    };
+  }
+
+  async function handleFillForm(entryDateIso) {
+    log().info?.('handleFillForm called', { entryDateIso });
+
+    if (!entryDateIso) {
+      return { ok: false, error: 'Entry date is required. Open the extension popup and select a date.' };
+    }
 
     if (!isTargetPage()) {
       log().warn?.('fill aborted: not on foreigners page');
@@ -112,7 +164,9 @@ const TARGET_PATH = '/e-visa/foreigners';
     try {
       ensureDependencies();
       const profile = await loadProfile();
+      const appliedDates = applyEntryDate(profile, entryDateIso);
       const result = await globalThis.FormFiller.fillForm(profile);
+      result.appliedDates = appliedDates;
       return { ok: true, result };
     } catch (err) {
       log().error?.('handleFillForm failed', err.message, err.stack);
@@ -149,7 +203,7 @@ const TARGET_PATH = '/e-visa/foreigners';
     }
 
     if (message.action === 'fillForm') {
-      handleFillForm()
+      handleFillForm(message.entryDate)
         .then(sendResponse)
         .catch((err) => {
           log().error?.('fillForm listener failed', err.message, err.stack);

@@ -13,7 +13,7 @@
       "128": "icons/icon128.png"
     }
   },
-  "permissions": ["activeTab", "scripting", "webNavigation"],
+  "permissions": ["activeTab", "scripting", "webNavigation", "storage"],
   "host_permissions": ["https://evisa.gov.vn/*"],
   "background": {
     "service_worker": "background/service-worker.js"
