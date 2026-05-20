@@ -1,0 +1,16 @@
+{
+  "name": "vietman-visa-autofill",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Vietnam e-Visa form autofill Chrome extension",
+  "scripts": {
+    "build": "node scripts/build-bundle.js",
+    "fetch-options": "node scripts/fetch-options.js",
+    "dev": "node scripts/dev-watch.js",
+    "predev": "node scripts/build-bundle.js"
+  },
+  "devDependencies": {
+    "chokidar": "^4.0.3",
+    "ws": "^8.18.1"
+  }
+}
