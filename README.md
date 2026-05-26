@@ -7,10 +7,10 @@ Licensed under the [MIT License](LICENSE) — free to use, modify, and share.
 
 ## Introduction
 
-> The full walkthrough video is in production. A placeholder is included for now; replace `public/introduction.mp4` when ready.
-
-<video src="https://github.com/gssisaac/vietnam-e-visa/raw/main/public/introduction.mp4" controls width="100%">
-  Your browser does not support the video tag. <a href="public/introduction.mp4">Download introduction.mp4</a>
+<video controls width="100%">
+  <source src="https://github.com/gssisaac/vietnam-e-visa/raw/main/public/vietnam-e-visa-autofiller.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+  <a href="https://github.com/gssisaac/vietnam-e-visa/raw/main/public/vietnam-e-visa-autofiller.mp4">Download vietnam-e-visa-autofiller.mp4</a>
 </video>
 
 ## Install (recommended — GitHub Release)
@@ -78,7 +78,7 @@ Source layout:
 | `src/content/` | Content script on evisa.gov.vn |
 | `src/background/` | Service worker (script injection, dev reload) |
 | `src/lib/` | YAML parser, form filler, profile storage |
-| `public/` | Static assets (`profile.form.yaml`, icons, intro video) |
+| `public/` | Static assets (`profile.form.yaml`, icons, demo video) |
 
 ## Configure your profile
 
