@@ -11,6 +11,7 @@ const https = require('https');
 
 const API = 'https://api.evisa.gov.vn/client-service/public';
 const OUT = path.join(__dirname, '..', 'data', 'select-options.yaml');
+const OUT_PUBLIC = path.join(__dirname, '..', 'public', 'data', 'select-options.yaml');
 
 function fetchJson(url) {
   return new Promise((resolve, reject) => {
@@ -83,7 +84,10 @@ ${listYaml(hcmWards)}
 
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   fs.writeFileSync(OUT, content);
+  fs.mkdirSync(path.dirname(OUT_PUBLIC), { recursive: true });
+  fs.writeFileSync(OUT_PUBLIC, content);
   console.log(`Wrote ${OUT}`);
+  console.log(`Wrote ${OUT_PUBLIC}`);
   console.log(`  nationalities: ${nationalities.length}`);
   console.log(`  purposes: ${purposes.length}`);
   console.log(`  border gates (entry): ${borderGatesEntry.length}`);

@@ -1,0 +1,80 @@
+# Blank form template — copy to profile.yaml and fill in your details.
+
+personal_information:
+  surname: ""
+  given_name: ""
+  date_of_birth: ""                    # DD/MM/YYYY
+  date_of_birth_mode: "full"           # full | year_only
+  sex: ""                              # e.g. Male, Female
+  nationality: ""                      # see data/select-options.yaml e.g. Korea (South)
+  identity_card: ""
+  email: ""
+  agree_create_account: true
+  religion: ""
+  place_of_birth: ""
+  used_other_passports: false
+  multiple_nationalities: false
+  legal_violation: false
+
+requested_information:
+  entry_type: "single"                 # single | multiple
+  valid_from: ""
+  valid_to: ""
+
+passport_information:
+  number: ""
+  issuing_authority: ""
+  type: "Ordinary passport"
+  date_of_issue: ""
+  expiry_date: ""
+  other_valid_passports: false
+
+contact_information:
+  permanent_address: ""
+  contact_address: ""
+  telephone: ""
+  emergency_contact:
+    full_name: ""
+    address: ""
+    telephone: ""
+    relationship: ""
+
+occupation:
+  occupation: ""
+  occupation_info: ""
+  company_name: ""
+  position: ""
+  company_address: ""
+  company_phone: ""
+
+trip_information:
+  purpose_of_entry: ""
+  intended_entry_date: ""
+  length_of_stay_days: ""
+  phone_in_vietnam: ""
+  residential_address: ""
+  province_city: ""                    # e.g. HO CHI MINH City
+  ward_commune: ""                     # depends on province, e.g. BEN THANH WARD
+  border_gate_entry: ""                # e.g. Tan Son Nhat Int Airport (Ho Chi Minh City)
+  border_gate_exit: ""
+  temporary_residence_commitment: true
+  contact_agency_in_vietnam: false
+  visited_vietnam_last_year: false
+  relatives_in_vietnam: false
+
+# Required when visited_vietnam_last_year is true — one row per trip (DD/MM/YYYY)
+vietnam_visits_last_year: []
+# Example:
+# - from_date: "01/05/2025"
+#   to_date: "15/05/2025"
+#   purpose: "Trip"
+
+accompanying_children: []
+
+trip_expenses:
+  intended_expenses_usd: ""
+  bought_insurance: ""
+  expense_covered_by: ""
+
+declarations:
+  final_declaration: true

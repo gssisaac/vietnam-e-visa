@@ -1,0 +1,9 @@
+Do NOT load this project root folder in Chrome.
+
+Build first:
+  pnpm build
+
+Then load the built extension from:
+  vietman-visa/dist/
+
+Chrome → chrome://extensions → Load unpacked → select the dist folder

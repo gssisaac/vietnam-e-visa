@@ -1,0 +1,7 @@
+Load THIS folder in Chrome:
+
+  chrome://extensions → Developer mode → Load unpacked → select this dist/ folder
+
+Do NOT load the project root (vietman-visa/). That folder has no manifest and will fail.
+
+After code changes:  pnpm build  →  Reload extension in Chrome

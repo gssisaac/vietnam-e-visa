@@ -1,47 +1,74 @@
 # Vietnam e-Visa Autofill
 
-Local Chrome extension that fills the Vietnam e-Visa application form at `https://evisa.gov.vn/e-visa/foreigners` from a YAML profile file.
+Local Chrome extension that fills the Vietnam e-Visa application form at `https://evisa.gov.vn/e-visa/foreigners` from a YAML profile.
+
+Built with **TypeScript**, **React**, **Tailwind CSS**, and **shadcn/ui**.
 
 ## Install
 
-1. Open Chrome and go to `chrome://extensions`
-2. Enable **Developer mode**
-3. Click **Load unpacked**
-4. Select this folder (`vietman-visa`)
+1. Build the extension:
 
-## Dev watch (auto-reload on save)
+   ```bash
+   pnpm install
+   pnpm build
+   ```
 
-While editing the extension or `profile.yaml`, run:
+2. Open Chrome → `chrome://extensions`
+3. Enable **Developer mode**
+4. **Remove** any old copy of this extension (especially if it pointed at the project root)
+5. Click **Load unpacked**
+6. Select the **`dist`** folder inside this project (`vietman-visa/dist`)
 
-```bash
-npm install
-npm run dev
-```
+   **Important:** Do not load the project root folder. The root contains TypeScript source; only `dist/` is the built extension. Loading the wrong folder causes a **blank popup**.
 
-Source files live in `lib/` and `content/content.js`. They are bundled into `content/bundle.js` automatically (`npm run build` or via `npm run dev`).
+7. After each `pnpm build`, click **Reload** on the extension card in `chrome://extensions`
 
-This starts a local WebSocket server on port `9090`. When you save a file, the extension reloads automatically and any open `evisa.gov.vn` tabs refresh so content scripts pick up changes.
-
-Keep `npm run dev` running in a terminal. Reload the extension once manually after the first `npm run dev` if it was already loaded before adding the background script.
-
-After changing permissions in `manifest.json`, reload the extension once at `chrome://extensions`.
-
-## Configure
-
-1. Copy [`profile.form.yaml`](profile.form.yaml) to `profile.yaml`, or edit [`profile.yaml`](profile.yaml) directly
-2. On the extension page (`chrome://extensions`), click **Reload** on this extension after editing the YAML
-
-Use [`profile.example.yaml`](profile.example.yaml) for a filled example. See [`data/select-options.yaml`](data/select-options.yaml) for exact dropdown labels.
-
-### Select field values
-
-Dropdown values must match the **exact English labels** from the site API. Run this to generate a full reference list:
+## Development
 
 ```bash
-npm run fetch-options
+pnpm dev
 ```
 
-This writes [`data/select-options.yaml`](data/select-options.yaml) with every nationality, purpose, border gate, province, and sample ward label.
+Vite watches source files and hot-reloads the extension. Load **`dist`** once in Chrome; after code changes, click **Reload** on the extension card (or use the CRX dev tools refresh).
+
+Source layout:
+
+| Path | Purpose |
+|------|---------|
+| `src/popup/` | Extension popup (entry date + Fill Form) |
+| `src/editor/` | Profile YAML editor + instructions + LLM prompt |
+| `src/content/` | Content script on evisa.gov.vn |
+| `src/background/` | Service worker (script injection, dev reload) |
+| `src/lib/` | YAML parser, form filler, profile storage |
+| `public/` | Static assets (`profile.form.yaml`, icons, select options) |
+
+## Configure your profile
+
+### Option A — Profile editor (recommended)
+
+1. Click the extension icon → **Edit profile**, or right-click the extension → **Options**
+2. Edit YAML in the **Editor** tab
+3. Click **Save** (stored in extension storage)
+
+### Option B — LLM Q&A prompt
+
+1. Open the profile editor → **LLM Q&A Prompt** tab
+2. Copy the prompt into ChatGPT, Claude, or similar
+3. Answer one question at a time; paste the generated YAML into the editor and save
+
+### Option C — Manual YAML file
+
+- Template: [`profile.form.yaml`](profile.form.yaml)
+- Example: [`profile.example.yaml`](profile.example.yaml)
+- Use **Download** in the editor to export `profile.yaml` for backup
+
+Dropdown values must match **exact English labels** from the site. Refresh the reference list:
+
+```bash
+pnpm run fetch-options
+```
+
+This updates [`data/select-options.yaml`](data/select-options.yaml) (and the copy in `public/data/`).
 
 Common examples (copy exactly):
 
@@ -58,7 +85,7 @@ Dates use **DD/MM/YYYY** format.
 
 ## Usage
 
-1. Log in to [evisa.gov.vn](https://evisa.gov.vn) and navigate to the foreigners application form
+1. Log in to [evisa.gov.vn](https://evisa.gov.vn) and open the foreigners application form
 2. Dismiss the instruction modal manually (first visit only)
 3. Upload portrait and passport photos manually
 4. Click the extension icon → pick **Intended entry date** → **Fill Form**
@@ -83,9 +110,8 @@ The popup entry date overrides `intended_entry_date`, `valid_from`, and `valid_t
 
 ## Troubleshooting
 
-- **"Could not connect" / content script missing** — The site is a SPA; the extension now auto-injects on `/e-visa/foreigners`. Reload the extension at `chrome://extensions` once, then open the popup again (no page refresh required in most cases).
-- **"Extension not loaded on this tab"** — Fixed in recent versions via programmatic injection. Reload the extension if you still see this.
-- **Select option not found** — Check the label in `profile.yaml` matches the dropdown text on the site
-- **Debugging** — Open DevTools on the e-visa tab → Console, filter by `[Vietnam e-Visa]` to see step-by-step fill logs and errors
+- **"Could not connect"** — Reload the extension at `chrome://extensions`, then reopen the popup on the foreigners form page
+- **Select option not found** — Check the label in your profile matches the dropdown text on the site
+- **Debugging** — DevTools on the e-visa tab → Console, filter by `[Vietnam e-Visa]`
 - **Ward/commune fails** — Ensure `province_city` is correct; ward options load after province is selected
 - **Next button still disabled** — Upload photos and verify required fields manually

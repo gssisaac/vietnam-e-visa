@@ -2,12 +2,12 @@
   "manifest_version": 3,
   "name": "Vietnam e-Visa Autofill",
   "version": "1.0.0",
-  "description": "Auto-fill Vietnam e-Visa application form from a local YAML profile.",
+  "description": "Auto-fill Vietnam e-Visa application form from a YAML profile.",
   "icons": {
     "128": "icons/icon128.png"
   },
   "action": {
-    "default_popup": "popup/popup.html",
+    "default_popup": "src/popup/index.html",
     "default_title": "Vietnam e-Visa Autofill",
     "default_icon": {
       "128": "icons/icon128.png"
@@ -16,19 +16,24 @@
   "permissions": ["activeTab", "scripting", "webNavigation", "storage"],
   "host_permissions": ["https://evisa.gov.vn/*"],
   "background": {
-    "service_worker": "background/service-worker.js"
+    "service_worker": "src/background/index.ts",
+    "type": "module"
   },
   "content_scripts": [
     {
       "matches": ["https://evisa.gov.vn/*"],
-      "js": ["content/bundle.js"],
+      "js": ["src/content/index.ts"],
       "run_at": "document_idle"
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["profile.yaml"],
+      "resources": ["profile.form.yaml", "profile.example.yaml", "data/select-options.yaml"],
       "matches": ["https://evisa.gov.vn/*"]
     }
-  ]
+  ],
+  "options_ui": {
+    "page": "src/editor/index.html",
+    "open_in_tab": true
+  }
 }

@@ -1,13 +1,11 @@
-const CONTENT_SCRIPT_FILES = ['content/bundle.js'];
-
 const DEV_RELOAD_URL = 'ws://127.0.0.1:9090';
 const RECONNECT_MS = 2000;
 
-function sleep(ms) {
+function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function isForeignersUrl(url) {
+function isForeignersUrl(url: string | undefined) {
   if (!url) return false;
   try {
     const { hostname, pathname } = new URL(url);
@@ -17,7 +15,7 @@ function isForeignersUrl(url) {
   }
 }
 
-async function pingTab(tabId) {
+async function pingTab(tabId: number) {
   try {
     return await chrome.tabs.sendMessage(tabId, { action: 'ping' });
   } catch {
@@ -25,20 +23,26 @@ async function pingTab(tabId) {
   }
 }
 
-async function injectContentScripts(tabId) {
+async function injectContentScripts(tabId: number) {
+  const manifest = chrome.runtime.getManifest();
+  const files = manifest.content_scripts?.[0]?.js;
+  if (!files?.length) {
+    throw new Error('No content script registered in manifest.');
+  }
+
   console.log('[Vietnam e-Visa Autofill] Injecting content scripts into tab', tabId);
   await chrome.scripting.executeScript({
     target: { tabId, allFrames: false },
-    files: CONTENT_SCRIPT_FILES,
+    files,
   });
   await sleep(200);
 }
 
-function isPingReady(ping) {
+function isPingReady(ping: { ok?: boolean; depsOk?: boolean } | null) {
   return Boolean(ping?.ok && ping.depsOk !== false);
 }
 
-async function ensureContentScripts(tabId) {
+async function ensureContentScripts(tabId: number) {
   let ping = await pingTab(tabId);
   if (isPingReady(ping)) return ping;
 
@@ -56,7 +60,7 @@ async function ensureContentScripts(tabId) {
 }
 
 function connectDevReload() {
-  let ws;
+  let ws: WebSocket;
 
   try {
     ws = new WebSocket(DEV_RELOAD_URL);
@@ -76,9 +80,7 @@ function connectDevReload() {
 
     try {
       const tabs = await chrome.tabs.query({ url: 'https://evisa.gov.vn/*' });
-      await Promise.all(
-        tabs.map((tab) => (tab.id ? chrome.tabs.reload(tab.id) : Promise.resolve()))
-      );
+      await Promise.all(tabs.map((tab) => (tab.id ? chrome.tabs.reload(tab.id) : Promise.resolve())));
     } catch (err) {
       console.warn('[Vietnam e-Visa Autofill] Tab reload failed:', err);
     }
@@ -125,3 +127,5 @@ chrome.webNavigation.onCompleted.addListener(
 );
 
 connectDevReload();
+
+export {};

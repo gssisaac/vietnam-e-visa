@@ -1,0 +1,78 @@
+# Example profile with sample values (not real data).
+# For a blank template use profile.form.yaml. Your live data goes in profile.yaml.
+
+personal_information:
+  surname: "JOHN"
+  given_name: "DOE"
+  date_of_birth: "01/01/1990"          # DD/MM/YYYY
+  date_of_birth_mode: "full"           # full | year_only
+  sex: "Male"
+  nationality: "United States"
+  identity_card: ""
+  email: "your.email@example.com"
+  agree_create_account: true
+  religion: "None"
+  place_of_birth: "Seoul"
+  used_other_passports: false
+  multiple_nationalities: false
+  legal_violation: false
+
+requested_information:
+  entry_type: "single"                 # single | multiple
+  valid_from: "01/06/2026"
+  valid_to: "30/06/2026"
+
+passport_information:
+  number: "M12345678"
+  issuing_authority: "Ministry of Foreign Affairs, Republic of Korea"
+  type: "Ordinary passport"
+  date_of_issue: "01/01/2020"
+  expiry_date: "01/01/2030"
+  other_valid_passports: false
+
+contact_information:
+  permanent_address: "123 Example Street, Seoul, Republic of Korea"
+  contact_address: "123 Example Street, Seoul, Republic of Korea"
+  telephone: "+82-10-1234-5678"
+  emergency_contact:
+    full_name: "Emergency Contact Name"
+    address: "456 Example Street, Seoul, Republic of Korea"
+    telephone: "+82-10-9876-5432"
+    relationship: "Spouse"
+
+occupation:
+  occupation: "Employee"
+  occupation_info: "Software Engineer"
+  company_name: "Example Company Ltd"
+  position: "Senior Engineer"
+  company_address: "789 Business Road, Seoul, Republic of Korea"
+  company_phone: "+82-2-1234-5678"
+
+trip_information:
+  purpose_of_entry: "Tourism"
+  intended_entry_date: "05/06/2026"
+  length_of_stay_days: "25"
+  phone_in_vietnam: "+84-90-123-4567"
+  residential_address: "123 Nguyen Hue, District 1"
+  province_city: "HO CHI MINH City"
+  ward_commune: "BEN THANH WARD"
+  border_gate_entry: "Tan Son Nhat Int Airport (Ho Chi Minh City)"
+  border_gate_exit: "Tan Son Nhat Int Airport (Ho Chi Minh City)"
+  temporary_residence_commitment: true
+  contact_agency_in_vietnam: false
+  visited_vietnam_last_year: false
+  relatives_in_vietnam: false
+
+accompanying_children: []
+# Example:
+# - full_name: "CHILD NAME"
+#   sex: "Male"
+#   date_of_birth: "01/01/2020"
+
+trip_expenses:
+  intended_expenses_usd: "2000"
+  bought_insurance: "No"
+  expense_covered_by: "Self"
+
+declarations:
+  final_declaration: true
