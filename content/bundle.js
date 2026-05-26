@@ -523,11 +523,78 @@ if (!globalThis.VietnamVisaLog) {
     await fillCheckbox(checkbox, checked);
   }
 
-  async function clickPlusChildRow() {
-    const plus = document.querySelector('.ant-table-summary img[alt="PlusCircle"]');
-    if (!plus) throw new Error('Child row plus button not found');
+  function findTableByColumnHeaders(requiredHeaders) {
+    for (const wrapper of document.querySelectorAll('.ant-table-wrapper')) {
+      const headers = [...wrapper.querySelectorAll('th')].map((th) => th.textContent.trim());
+      if (requiredHeaders.every((text) => headers.some((h) => h.includes(text)))) {
+        return wrapper;
+      }
+    }
+    return null;
+  }
+
+  function getTableDataRows(tableWrapper) {
+    const tbody = tableWrapper?.querySelector('.ant-table-tbody');
+    if (!tbody) return [];
+
+    return [...tbody.querySelectorAll('tr')].filter(
+      (row) => !row.classList.contains('ant-table-measure-row') && !row.classList.contains('ant-table-placeholder')
+    );
+  }
+
+  function findVisitHistoryTable() {
+    return findTableByColumnHeaders(['From date', 'Purpose of trip']);
+  }
+
+  function findChildrenTable() {
+    return findTableByColumnHeaders(['Full name']);
+  }
+
+  async function clickPlusTableRow(tableWrapper, label) {
+    const plus = tableWrapper?.querySelector('.ant-table-summary img[alt="PlusCircle"]');
+    if (!plus) throw new Error(`${label} plus button not found`);
     plus.click();
     await sleep(300);
+  }
+
+  async function fillPickerInput(input, value) {
+    if (!value || !input) return;
+
+    input.click();
+    await sleep(100);
+    input.removeAttribute('readonly');
+    setInputValue(input, String(value));
+    await sleep(50);
+    document.body.click();
+    await sleep(50);
+  }
+
+  async function fillVisitHistoryRow(row, visit) {
+    const dateInputs = row.querySelectorAll('.ant-picker-input input');
+    if (dateInputs.length < 2) throw new Error('Visit row date inputs not found');
+
+    await fillPickerInput(dateInputs[0], visit.from_date);
+    await fillPickerInput(dateInputs[1], visit.to_date);
+
+    const purposeInput =
+      row.querySelector('input[placeholder*="purpose" i]') ||
+      [...row.querySelectorAll('input.ant-input')].find((input) => !input.closest('.ant-picker'));
+
+    if (!purposeInput) throw new Error('Visit row purpose input not found');
+    setInputValue(purposeInput, String(visit.purpose || ''));
+    await sleep(50);
+  }
+
+  async function clickPlusChildRow() {
+    const table = findChildrenTable();
+    if (!table) throw new Error('Children table not found');
+    await clickPlusTableRow(table, 'Child row');
+  }
+
+  async function clickPlusVisitRow() {
+    const table = findVisitHistoryTable();
+    if (!table) throw new Error('Visit history table not found');
+    await clickPlusTableRow(table, 'Visit history row');
   }
 
   return {
@@ -542,7 +609,11 @@ if (!globalThis.VietnamVisaLog) {
     fillRadioByName,
     fillCheckboxById,
     fillCheckboxByText,
+    findVisitHistoryTable,
+    getTableDataRows,
+    fillVisitHistoryRow,
     clickPlusChildRow,
+    clickPlusVisitRow,
   };
   })();
 })();
@@ -707,9 +778,48 @@ if (!globalThis.VietnamVisaLog) {
     }
     if (t.visited_vietnam_last_year !== undefined) {
       await runStep('visited_vietnam_last_year', () => H.fillRadioByQuestion('Have you been to Viet Nam in the last 01 year', t.visited_vietnam_last_year), result);
+      if (t.visited_vietnam_last_year) {
+        await H.sleep(400);
+        await fillVisitHistory(data, result);
+      }
     }
     if (t.relatives_in_vietnam !== undefined) {
       await runStep('relatives_in_vietnam', () => H.fillRadioByQuestion('Do you have relatives who currently reside in Viet Nam', t.relatives_in_vietnam), result);
+    }
+  }
+
+  async function fillVisitHistory(data, result) {
+    const visits = data.vietnam_visits_last_year || [];
+    const H = getH();
+
+    if (!visits.length) {
+      result.skipped.push('vietnam_visits_last_year (empty)');
+      return;
+    }
+
+    const table = await H.waitFor(() => H.findVisitHistoryTable(), 5000);
+    if (!table) {
+      result.errors.push('visit_history: table not found after selecting Yes');
+      return;
+    }
+
+    for (let i = 0; i < visits.length; i += 1) {
+      const visit = visits[i];
+      const prefix = `visit_${i + 1}`;
+
+      if (i > 0) {
+        await runStep(`${prefix}_add_row`, () => H.clickPlusVisitRow(), result);
+        await H.sleep(300);
+      }
+
+      const rows = H.getTableDataRows(table);
+      const row = rows[rows.length - 1];
+      if (!row) {
+        result.errors.push(`${prefix}: row not found`);
+        continue;
+      }
+
+      await runStep(`${prefix}_from_date`, () => H.fillVisitHistoryRow(row, visit), result);
     }
   }
 

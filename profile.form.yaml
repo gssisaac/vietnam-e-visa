@@ -62,6 +62,13 @@ trip_information:
   visited_vietnam_last_year: false
   relatives_in_vietnam: false
 
+# Required when visited_vietnam_last_year is true — one row per trip (DD/MM/YYYY)
+vietnam_visits_last_year: []
+# Example:
+# - from_date: "01/05/2025"
+#   to_date: "15/05/2025"
+#   purpose: "Trip"
+
 accompanying_children: []
 
 trip_expenses:
