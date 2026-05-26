@@ -1,15 +1,38 @@
 {
-  "name": "vietman-visa-autofill",
+  "name": "vietnam-e-visa-autofill",
   "version": "1.0.0",
-  "private": true,
-  "description": "Vietnam e-Visa form autofill Chrome extension",
+  "description": "Chrome extension that auto-fills the Vietnam e-Visa application form from a YAML profile",
   "type": "module",
+  "license": "MIT",
+  "author": "Isaac Chaneel Lee <gssisaac@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gssisaac/vietnam-e-visa.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gssisaac/vietnam-e-visa/issues"
+  },
+  "homepage": "https://github.com/gssisaac/vietnam-e-visa#readme",
+  "keywords": [
+    "vietnam",
+    "e-visa",
+    "visa",
+    "chrome-extension",
+    "autofill",
+    "yaml",
+    "evisa.gov.vn"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@11.1.2",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "fetch-options": "node scripts/fetch-options.js",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "package": "pnpm build && node scripts/package-release.js",
+    "fetch-options": "node scripts/fetch-options.js"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.7",

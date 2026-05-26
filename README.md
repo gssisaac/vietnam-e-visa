@@ -2,26 +2,51 @@
 
 Local Chrome extension that fills the Vietnam e-Visa application form at `https://evisa.gov.vn/e-visa/foreigners` from a YAML profile.
 
-Built with **TypeScript**, **React**, **Tailwind CSS**, and **shadcn/ui**.
+Built with **TypeScript**, **React**, **Tailwind CSS**, and **shadcn/ui**.  
+Licensed under the [MIT License](LICENSE) — free to use, modify, and share.
 
-## Install
+## Introduction
 
-1. Build the extension:
+> The full walkthrough video is in production. A placeholder is included for now; replace `public/introduction.mp4` when ready.
 
-   ```bash
-   pnpm install
-   pnpm build
-   ```
+<video src="https://github.com/gssisaac/vietnam-e-visa/raw/main/public/introduction.mp4" controls width="100%">
+  Your browser does not support the video tag. <a href="public/introduction.mp4">Download introduction.mp4</a>
+</video>
 
-2. Open Chrome → `chrome://extensions`
-3. Enable **Developer mode**
-4. **Remove** any old copy of this extension (especially if it pointed at the project root)
-5. Click **Load unpacked**
-6. Select the **`dist`** folder inside this project (`vietman-visa/dist`)
+## Install (recommended — GitHub Release)
 
-   **Important:** Do not load the project root folder. The root contains TypeScript source; only `dist/` is the built extension. Loading the wrong folder causes a **blank popup**.
+The easiest way to install without building from source:
 
-7. After each `pnpm build`, click **Reload** on the extension card in `chrome://extensions`
+1. Open the [Releases](https://github.com/gssisaac/vietnam-e-visa/releases) page
+2. Download the latest **`vietnam-e-visa-v*.zip`** asset
+3. Unzip the file — you should see `manifest.json`, `icons/`, `assets/`, etc. at the top level
+4. Open Chrome → `chrome://extensions`
+5. Enable **Developer mode** (top right)
+6. Click **Load unpacked**
+7. Select the **unzipped folder** (the one that contains `manifest.json`)
+
+To update later, download the new release zip, remove the old unpacked folder, and load the new one (or replace files and click **Reload** on the extension card).
+
+## Install from source (developers)
+
+```bash
+git clone https://github.com/gssisaac/vietnam-e-visa.git
+cd vietnam-e-visa
+pnpm install
+pnpm build
+```
+
+Then in Chrome → `chrome://extensions` → **Load unpacked** → select the **`dist`** folder inside the project.
+
+**Important:** Do not load the project root. Only the unzipped release folder or `dist/` after a build contains the compiled extension. Loading the wrong folder causes a blank popup or manifest errors.
+
+After code changes:
+
+```bash
+pnpm build
+```
+
+Click **Reload** on the extension in `chrome://extensions`.
 
 ## Development
 
@@ -29,7 +54,7 @@ Built with **TypeScript**, **React**, **Tailwind CSS**, and **shadcn/ui**.
 pnpm dev
 ```
 
-Vite watches source files and hot-reloads the extension. Load **`dist`** once in Chrome; after code changes, click **Reload** on the extension card (or use the CRX dev tools refresh).
+Vite watches source files and hot-reloads the extension. Load **`dist`** once in Chrome; after code changes, click **Reload** on the extension card.
 
 Source layout:
 
@@ -40,7 +65,7 @@ Source layout:
 | `src/content/` | Content script on evisa.gov.vn |
 | `src/background/` | Service worker (script injection, dev reload) |
 | `src/lib/` | YAML parser, form filler, profile storage |
-| `public/` | Static assets (`profile.form.yaml`, icons, select options) |
+| `public/` | Static assets (`profile.form.yaml`, icons, intro video) |
 
 ## Configure your profile
 
@@ -115,3 +140,7 @@ The popup entry date overrides `intended_entry_date`, `valid_from`, and `valid_t
 - **Debugging** — DevTools on the e-visa tab → Console, filter by `[Vietnam e-Visa]`
 - **Ward/commune fails** — Ensure `province_city` is correct; ward options load after province is selected
 - **Next button still disabled** — Upload photos and verify required fields manually
+
+## License
+
+MIT © [Isaac Chaneel Lee](https://github.com/gssisaac). See [LICENSE](LICENSE).
