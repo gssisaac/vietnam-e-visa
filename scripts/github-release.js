@@ -16,19 +16,23 @@ if (!fs.existsSync(zip)) {
   process.exit(1);
 }
 
-const exists = execSync(`gh release view "${tag}" 2>/dev/null && echo yes || echo no`, {
-  encoding: 'utf8',
-}).trim();
+function releaseExists(releaseTag) {
+  try {
+    execSync(`gh release view "${releaseTag}"`, { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
-if (exists === 'yes') {
+if (releaseExists(tag)) {
   console.log(`Updating release ${tag}…`);
   execSync(`gh release upload "${tag}" "${zip}" --clobber`, { stdio: 'inherit' });
 } else {
   console.log(`Creating release ${tag}…`);
-  execSync(
-    `gh release create "${tag}" "${zip}" --title "${tag}" --generate-notes`,
-    { stdio: 'inherit' }
-  );
+  execSync(`gh release create "${tag}" "${zip}" --title "${tag}" --generate-notes`, {
+    stdio: 'inherit',
+  });
 }
 
 console.log(`\nRelease ready: https://github.com/gssisaac/vietnam-e-visa/releases/tag/${tag}`);

@@ -15,6 +15,19 @@ if (!fs.existsSync(ICON)) {
 }
 
 const tmp = `${ICON}.tmp.png`;
+
+const probe = execSync(
+  `ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 "${ICON}"`,
+  { encoding: 'utf8' }
+).trim();
+const [width, height] = probe.split(',').map(Number);
+
+if (width <= SIZE && height <= SIZE) {
+  const { size } = fs.statSync(ICON);
+  console.log(`Icon already ${width}x${height} (${(size / 1024).toFixed(1)} KB) — skipping`);
+  process.exit(0);
+}
+
 execSync(
   `ffmpeg -y -loglevel error -i "${ICON}" -vf scale=${SIZE}:${SIZE} "${tmp}" && mv "${tmp}" "${ICON}"`,
   { stdio: 'inherit', shell: true }
