@@ -28,10 +28,12 @@
   "packageManager": "pnpm@11.1.2",
   "scripts": {
     "dev": "vite",
+    "prebuild": "node scripts/optimize-icons.js",
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "package": "pnpm build && node scripts/package-release.js",
+    "release": "pnpm package && node scripts/github-release.js",
     "fetch-options": "node scripts/fetch-options.js"
   },
   "dependencies": {

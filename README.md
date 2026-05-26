@@ -27,6 +27,8 @@ The easiest way to install without building from source:
 
 To update later, download the new release zip, remove the old unpacked folder, and load the new one (or replace files and click **Reload** on the extension card).
 
+> **Version note:** Release zip names follow `package.json` version (e.g. `vietnam-e-visa-v1.0.0.zip`). Bump `"version"` in `package.json` before pushing to main to publish a new release tag. Pushes to `main` automatically build and upload the zip via GitHub Actions.
+
 ## Install from source (developers)
 
 ```bash
@@ -47,6 +49,17 @@ pnpm build
 ```
 
 Click **Reload** on the extension in `chrome://extensions`.
+
+### Publish a new release (maintainers)
+
+```bash
+# 1. Bump version in package.json (e.g. 1.0.0 → 1.0.1)
+# 2. Push to main — GitHub Actions builds the zip and creates/updates the release
+git push origin main
+
+# Or manually:
+pnpm release   # builds zip + gh release create/upload
+```
 
 ## Development
 

@@ -3,3 +3,5 @@ node_modules/
 profile.yaml
 .vite/
 vietnam-e-visa-v*.zip
+.DS_Store
+**/.DS_Store

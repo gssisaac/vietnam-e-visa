@@ -1,0 +1,57 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-main
+  cancel-in-progress: true
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.1.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build and package extension
+        run: pnpm package
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          TAG="v${VERSION}"
+          ZIP="vietnam-e-visa-v${VERSION}.zip"
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Updating existing release $TAG"
+            gh release upload "$TAG" "$ZIP" --clobber
+          else
+            echo "Creating release $TAG"
+            gh release create "$TAG" "$ZIP" \
+              --title "$TAG" \
+              --notes "Automated release from main (\`${GITHUB_SHA::7}\`). Download the zip, unzip, and load unpacked in Chrome."
+          fi

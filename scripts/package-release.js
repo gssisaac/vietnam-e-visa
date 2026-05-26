@@ -18,5 +18,12 @@ if (!fs.existsSync(DIST)) {
 
 if (fs.existsSync(OUT)) fs.unlinkSync(OUT);
 
-execSync(`cd "${DIST}" && zip -r "${OUT}" .`, { stdio: 'inherit' });
-console.log(`\nPackaged ${path.relative(ROOT, OUT)}`);
+// Exclude macOS junk and hidden files from the extension zip.
+execSync(
+  `cd "${DIST}" && zip -r "${OUT}" . -x "*.DS_Store" -x "**/.DS_Store" -x "__MACOSX/*" -x "**/__MACOSX/*"`,
+  { stdio: 'inherit' }
+);
+
+const { size } = fs.statSync(OUT);
+console.log(`\nPackaged ${path.basename(OUT)} (${(size / 1024).toFixed(1)} KB)`);
+console.log(`Version: ${version} → tag v${version}`);
