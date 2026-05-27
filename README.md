@@ -8,9 +8,9 @@ Licensed under the [MIT License](LICENSE) — free to use, modify, and share.
 ## Introduction
 
 <video controls width="100%">
-  <source src="https://isaaclee.xyz/2026-05-27-vietnam-e-visa-autofill/vietnam-e-visa-autofiller.mp4" type="video/mp4">
+  <source src="https://github.com/user-attachments/assets/b2c6c722-96b1-4644-b7ee-b675ce845e49" type="video/mp4">
   Your browser does not support the video tag.
-  <a href="https://isaaclee.xyz/2026-05-27-vietnam-e-visa-autofill/vietnam-e-visa-autofiller.mp4">Watch demo video</a>
+  <a href="https://github.com/user-attachments/assets/b2c6c722-96b1-4644-b7ee-b675ce845e49">Watch demo video</a>
 </video>
 
 **[▶ Watch demo video](https://isaaclee.xyz/2026-05-27-vietnam-e-visa-autofill/vietnam-e-visa-autofiller.mp4)**
