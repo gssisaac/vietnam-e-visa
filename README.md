@@ -7,11 +7,20 @@ Licensed under the [MIT License](LICENSE) — free to use, modify, and share.
 
 ## Introduction
 
-<video controls width="100%">
-  <source src="https://github.com/gssisaac/vietnam-e-visa/raw/main/public/vietnam-e-visa-autofiller.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-  <a href="https://github.com/gssisaac/vietnam-e-visa/raw/main/public/vietnam-e-visa-autofiller.mp4">Download vietnam-e-visa-autofiller.mp4</a>
-</video>
+Run once to publish the demo video on this page (GitHub CDN, under 10 MB):
+
+```bash
+pnpm upload-readme-video
+```
+
+A browser window opens — log in to GitHub if needed. The script uploads `media/vietnam-e-visa-autofiller.mp4` and patches this section to:
+
+```markdown
+https://github.com/user-attachments/assets/<uuid>
+```
+
+That bare URL is the format GitHub README uses for inline video playback.
+
 
 ## Install (recommended — GitHub Release)
 
@@ -78,7 +87,8 @@ Source layout:
 | `src/content/` | Content script on evisa.gov.vn |
 | `src/background/` | Service worker (script injection, dev reload) |
 | `src/lib/` | YAML parser, form filler, profile storage |
-| `public/` | Static assets (`profile.form.yaml`, icons, demo video) |
+| `public/` | Static assets bundled into the extension (`profile.form.yaml`, icons) |
+| `media/` | Demo video for README (not bundled into the extension) |
 
 ## Configure your profile
 

@@ -34,6 +34,7 @@
     "clean": "rm -rf dist",
     "package": "pnpm build && node scripts/package-release.js",
     "release": "pnpm package && node scripts/github-release.js",
+    "upload-readme-video": "bash scripts/upload-readme-video.sh",
     "fetch-options": "node scripts/fetch-options.js"
   },
   "dependencies": {
