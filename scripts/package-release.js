@@ -20,7 +20,7 @@ if (fs.existsSync(OUT)) fs.unlinkSync(OUT);
 
 // Exclude macOS junk and hidden files from the extension zip.
 execSync(
-  `cd "${DIST}" && zip -r "${OUT}" . -x "*.DS_Store" -x "**/.DS_Store" -x "__MACOSX/*" -x "**/__MACOSX/*" -x "*.mp4" -x "**/*.mp4"`,
+  `cd "${DIST}" && zip -r "${OUT}" . -x "*.DS_Store" -x "**/.DS_Store" -x "__MACOSX/*" -x "**/__MACOSX/*"`,
   { stdio: 'inherit' }
 );
 
