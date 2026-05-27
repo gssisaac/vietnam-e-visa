@@ -23,7 +23,7 @@
     "evisa.gov.vn"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "packageManager": "pnpm@11.1.2",
   "scripts": {

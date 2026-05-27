@@ -18,9 +18,9 @@ if (!fs.existsSync(DIST)) {
 
 if (fs.existsSync(OUT)) fs.unlinkSync(OUT);
 
-// Exclude macOS junk and hidden files from the extension zip.
+// Exclude macOS junk, dev artifacts, and hidden files from the extension zip.
 execSync(
-  `cd "${DIST}" && zip -r "${OUT}" . -x "*.DS_Store" -x "**/.DS_Store" -x "__MACOSX/*" -x "**/__MACOSX/*"`,
+  `cd "${DIST}" && zip -r "${OUT}" . -x "*.DS_Store" -x "**/.DS_Store" -x "**/.playwright-cli/*" -x "__MACOSX/*" -x "**/__MACOSX/*"`,
   { stdio: 'inherit' }
 );
 
