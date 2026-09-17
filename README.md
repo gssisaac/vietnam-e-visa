@@ -127,7 +127,7 @@ Dates use **DD/MM/YYYY** format.
 4. Click the extension icon → pick **Intended entry date** → **Fill Form**
 5. Review all fields, upload any remaining items, then click **Next** yourself
 
-The popup entry date overrides `intended_entry_date`, `valid_from`, and `valid_to` (`valid_to` = entry + `length_of_stay_days` from profile).
+The popup entry date overrides `intended_entry_date`, `valid_from`, and `valid_to` (`valid_to` = entry + (`length_of_stay_days` - 1) from profile).
 
 ## What is filled
 
