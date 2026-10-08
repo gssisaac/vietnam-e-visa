@@ -1,4 +1,5 @@
 import { VietnamVisaLog } from './logger';
+import { normalizePurposeOfEntry } from './shared';
 import { FieldHelpers } from './field-helpers';
 import {
   filterVisitsWithinLastYear,
@@ -223,7 +224,7 @@ async function fillTrip(data: VisaProfile, result: FillResult) {
   const t = (data.trip_information || {}) as ProfileSection;
   const H = FieldHelpers;
 
-  await runStep('purpose_of_entry', () => H.fillAntSelect('basic_ttcdMucDich', t.purpose_of_entry), result);
+  await runStep('purpose_of_entry', () => H.fillAntSelect('basic_ttcdMucDich', normalizePurposeOfEntry(t.purpose_of_entry)), result);
   await runStep('intended_entry_date', () => H.fillAntDate('basic_ttcdThoiGianNcStr', t.intended_entry_date), result);
   await runStep('length_of_stay', () => H.fillInput('basic_ttcdSoNgayTamTru', t.length_of_stay_days), result);
   await runStep('phone_in_vietnam', () => H.fillInput('basic_ttcdSdt', t.phone_in_vietnam), result);

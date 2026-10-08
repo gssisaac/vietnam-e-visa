@@ -1,3 +1,5 @@
+import { syncNow } from '@/lib/profile-sync';
+import { STORAGE_KEY_PROFILES, STORAGE_KEY_DELETED_PROFILES } from '@/lib/profile-storage';
 const DEV_RELOAD_URL = 'ws://127.0.0.1:9090';
 const RECONNECT_MS = 2000;
 
@@ -97,6 +99,27 @@ function connectDevReload() {
   };
 }
 
+// Once the user unlocks the encrypted vault, synchronize saved changes
+// and remote Chrome Sync changes while Chrome remains open.
+let syncTimer: ReturnType<typeof setTimeout> | undefined;
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  const localChange = areaName === 'local' &&
+    (STORAGE_KEY_PROFILES in changes || STORAGE_KEY_DELETED_PROFILES in changes);
+  const remoteChange = areaName === 'sync' &&
+    Object.keys(changes).some((key) => key.startsWith('visaEvisaSync'));
+  if (!localChange && !remoteChange) return;
+  if (syncTimer) clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    syncTimer = undefined;
+    void syncNow().catch((err) => {
+      // Locked is expected on a freshly restarted browser; manual unlock restores sync.
+      if (!String(err).includes('Unlock Chrome Sync')) {
+        console.warn('[Vietnam e-Visa Autofill] Encrypted sync:', err);
+      }
+    });
+  }, 900);
+});
+
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.action === 'ensureContentScripts') {
     ensureContentScripts(message.tabId)
@@ -126,6 +149,11 @@ chrome.webNavigation.onCompleted.addListener(
   { url: [{ hostSuffix: 'evisa.gov.vn' }] }
 );
 
-connectDevReload();
+// Local reload server is available only when running the Vite development build.
+// Vite statically replaces import.meta.env.DEV with false in production and
+// removes the WebSocket client (including its reconnect timer) from releases.
+if (import.meta.env.DEV) {
+  connectDevReload();
+}
 
 export {};

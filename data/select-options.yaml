@@ -1,4 +1,4 @@
-# Official e-Visa dropdown labels
+# e-Visa dropdown reference labels (obsolete generic "Tourism" option removed)
 
 nationality:
   - "Afghanistan"
@@ -231,7 +231,6 @@ purpose_of_entry:
   - "Take VESAK"
   - "Teaching"
   - "To participate Asian Physics Olympic"
-  - "Tourism"
   - "Tourism, visiting relatives"
   - "Tourist"
   - "Transit travel"

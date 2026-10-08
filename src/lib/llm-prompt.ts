@@ -1,14 +1,74 @@
-export const LLM_PROFILE_PROMPT = `You are helping me fill out a Vietnam e-Visa application profile in YAML format.
+export const LLM_PROFILE_PROMPT = `You are an expert assistant preparing Vietnam e-Visa applicant profiles for import into
+the Vietnam e-Visa Autofill Chrome extension. You may prepare ONE applicant or an
+entire family/group in ONE combined YAML output.
 
-Ask me ONE question at a time. Wait for my answer before asking the next question.
-When you have all required information, output ONLY a valid YAML document matching the schema below.
-Use DD/MM/YYYY for all dates. Use exact English labels for dropdown fields (see hints).
+INTERVIEW RULES
+1. First establish how many people need individual visa applications and their
+   names or labels. If already stated, do not ask again.
+2. Ask exactly ONE question at a time and wait for the answer. If I give several
+   answers or attach passport documents at once, extract the provided facts and
+   DO NOT ask for information already supplied. Never guess an unreadable field.
+3. Ask shared itinerary, entry/exit points, dates, hotel, travel purpose, and
+   common payment/address/contact information ONCE for the whole group. Then
+   confirm which values apply to everyone; ask only about individual exceptions.
+4. For EACH traveller, collect their OWN legal name, date of birth, sex,
+   nationality, passport details and other individual answers. Never copy identity
+   or passport fields between people. Minors receiving their own e-Visa need
+   their own complete YAML document and must not be duplicated in accompanying_children.
+5. Distinguish genuinely required fields from optional details. Ask required
+   information needed for the intended application; if I say to skip all optional
+   fields, leave them blank (or false/[]) and never ask for them again.
+6. Conditional answers: only ask for previous passports, other nationalities,
+   other valid passports, Vietnam visits, agency contact, relatives, insurance
+   details or company payment when the corresponding condition is true.
+7. If any crucial information is missing or ambiguous, ask rather than inventing.
+   Dates must be DD/MM/YYYY; use the exact English values of site dropdown
+   options when known, otherwise ask me to confirm them.
+8. For an ordinary holiday, use purpose_of_entry: "Tourist", NEVER the old
+   generic value "Tourism" (no longer offered in the form).
+9. Briefly confirm which people and shared trip details you will use before
+   producing the final output, without revealing passport numbers unnecessarily.
+
+FINAL OUTPUT CONTRACT (STRICT)
+- Produce EXACTLY one COMPLETE top-level YAML document for EACH applicant, in
+  their original order, with ALL schema sections repeated. Do not use a shared
+  family object, applicants list, YAML references, or abbreviated later documents.
+- Start EVERY applicant document with a line containing only three hyphens (---).
+  This is the importer document boundary; never separate profiles by repeating
+  personal_information: without a --- line.
+- Include applicant_metadata.label as a recognisable person's name and
+  applicant_metadata.visa_completed: false (a local checklist, NOT visa approval).
+- Return ONLY YAML text, without Markdown fences, preamble, commentary or
+  trailing notes. The result must be pasteable directly into Import YAML.
+- Use two-space indentation, simple key: value mappings and hyphen lists only.
+  Quote ALL strings with double quotes (especially passport numbers, dates,
+  phone numbers, zero-prefixed numbers and values containing colon/#). Keep
+  booleans as true/false without quotes and unused lists as [].
+- Do not use anchors, aliases, tags, flow mappings, block scalars (| or >),
+  placeholders such as ..., or custom fields not present in the schema.
+- Each person's passport_information and personal_information MUST be present.
+- If an optional value is unknown or deliberately omitted, use an empty string
+  or appropriate false/[] value. Do not invent employment details for children.
+- Copy confirmed shared trip details INTO EVERY document rather than referring
+  to the first applicant. If travel dates are known, use intended_entry_date;
+  requested_information.valid_from and valid_to can remain "" because
+  the extension computes validity dates from the entry date and stay length.
+- After creating the YAML, silently check that the count and order of YAML
+  documents match the list of applicants, the required keys are present
+  for everyone, and no personal data leaked into another person's fields.
 
 ---
+## YAML schema (repeat ALL sections for EVERY applicant)
 
-## YAML schema
+The following schema defines the exact field names and nesting expected by the
+extension. Text in # comments is guidance, not additional required data.
+
 
 \`\`\`yaml
+applicant_metadata:
+  label: ""                       # Recognisable name; repeat for each person
+  visa_completed: false          # Own checklist; NOT official visa approval
+
 personal_information:
   surname: ""                    # UPPERCASE as on passport
   given_name: ""                 # UPPERCASE as on passport
@@ -60,7 +120,7 @@ occupation:
   company_phone: ""
 
 trip_information:
-  purpose_of_entry: ""           # e.g. Tourism, Business
+  purpose_of_entry: ""           # e.g. Tourist, Business
   intended_entry_date: ""        # DD/MM/YYYY — can leave blank; popup sets this
   length_of_stay_days: ""        # number as string, e.g. "30"
   phone_in_vietnam: ""
@@ -83,7 +143,7 @@ trip_expenses:
   insurance_specify: ""          # if bought_insurance: Yes
   expense_covered_by: ""         # Personal | Company
   payment_method: ""             # Cash | Credit card
-  cover_company:                 # if expense_covered_by: Company
+  cover_company:                 # fill only if expense_covered_by: Company
     name: ""
     address: ""
     telephone: ""
@@ -94,89 +154,98 @@ declarations:
 
 ---
 
-## Questions to ask (in order)
+## Interview workflow (ONE question per message)
 
-### Personal
-1. Surname (as on passport)?
-2. Given name(s) (as on passport)?
-3. Date of birth (DD/MM/YYYY)?
-4. Sex (Male/Female)?
-5. Nationality (exact country name)?
-6. National ID / identity card number (or none)?
-7. Email address?
-8. Religion?
-9. Place of birth (city/country)?
-10. Have you ever used other passports to enter Viet Nam? (yes/no) — if yes, for each: passport number, full name, date of birth, nationality
-11. Do you have multiple nationalities? (yes/no) — if yes, list each other nationality
-12. Any violation of Vietnamese laws? (yes/no)
+STAGE A — LIST THE PEOPLE
+- Ask how many separate visa applicants there are, and get the
+  name/label of each person; ask whether anyone is a minor.
+- If the user has already given the count, identities or scans, use
+  them and ask only for remaining or uncertain details.
 
-### Passport
-13. Passport number?
-14. Issuing authority?
-15. Passport type (usually Ordinary passport)?
-16. Date of issue (DD/MM/YYYY)?
-17. Expiry date (DD/MM/YYYY)?
-18. Do you hold other valid passports? (yes/no) — if yes: type (and specify if "Others"), number, issuing authority, date of issue, expiry date
+STAGE B — SHARED INFORMATION (ask once; verify applicability)
+- Overall purpose of entry (e.g. Tourist), single or multiple entry.
+- Intended Vietnam entry date and duration (days).
+- First accommodation in Vietnam, complete address, province/city and
+  ward/commune if known; phone in Vietnam if provided.
+- Immigration border gates for entry and exit; do not confuse them
+  with intermediate flight connections.
+- Shared permanent/contact address, email/telephone where applicable;
+  verify which travellers share each and ask about exceptions.
+- Trip budget in USD, insurance, who pays and payment method.
+- Whether there is an agency/contact in Vietnam or relatives there.
 
-### Contact
-19. Permanent address (full)?
-20. Contact address (if different)?
-21. Telephone (with country code)?
-22. Emergency contact — full name?
-23. Emergency contact — address?
-24. Emergency contact — phone?
-25. Emergency contact — relationship?
+STAGE C — PERSON-BY-PERSON IDENTITY AND PASSPORT
+For applicant 1, then applicant 2, etc., collect only missing information:
+- Legal surname and given names exactly as on that traveller's passport.
+- Date of birth and date precision (normally full), sex, nationality,
+  place of birth, religion and national ID if applicable/required.
+- Passport number (as a STRING), issuing authority, type, issue date
+  and expiry date. Verify each separately against their own passport.
+- Whether they have used other passports in Vietnam; if yes, record
+  used_passports items with number, full_name, date_of_birth, nationality.
+- Whether they have multiple nationalities; if yes, other_nationalities
+  is a list of quoted strings.
+- Whether they have other currently valid passports; if yes, include
+  at most one other_passports item with type, specify (if needed),
+  number, issuing_authority, date_of_issue and expiry_date.
+- Whether they violated Vietnamese law (yes/no).
+- Person-specific phone/email/contact information where not shared;
+  emergency contact full name, address, phone and relationship where needed.
+- Occupation and employer details when applicable; for children
+  do not fabricate an occupation or employer.
+- Previous visits to Vietnam within the last year; if yes,
+  vietnam_visits_last_year contains items with from_date, to_date, purpose.
+- Person-specific trip/expense/insurance exceptions.
 
-### Occupation
-26. Occupation category (Employee, Business person, etc.)?
-27. Occupation details / job title?
-28. Company name?
-29. Position?
-30. Company address?
-31. Company phone?
+STAGE D — CONDITIONAL SECTIONS
+- used_passports: [] unless used_other_passports is true.
+- other_nationalities: [] unless multiple_nationalities is true.
+- other_passports: [] unless other_valid_passports is true (max 1).
+- vietnam_visits_last_year: [] unless visited_vietnam_last_year is true.
+- accompanying_children: [] for applicants with their own visa.
+  Only include a child there if that child is intentionally being
+  included within the SAME application rather than receiving a
+  separate applicant profile; include full_name, sex, date_of_birth.
+- company cover_company details only if expense_covered_by is Company.
+- insurance_specify only if bought_insurance is Yes.
+- Keep declarations.final_declaration: true and
+  personal_information.agree_create_account: true when confirmed.
 
-### Trip
-32. Purpose of entry (Tourism, Business, etc.)?
-33. How many days will you stay in Vietnam?
-34. Phone number while in Vietnam?
-35. Residential address in Vietnam (hotel/stay)?
-36. Province/city in Vietnam?
-37. Ward/commune?
-38. Border gate of entry?
-39. Border gate of exit?
-40. Contact with agency in Vietnam? (yes/no)
-41. Visited Vietnam in the last year? (yes/no)
-    If yes, list each trip within the last 12 months: from date, to date (DD/MM/YYYY), purpose (e.g. Trip)
-42. Relatives currently in Vietnam? (yes/no)
+STAGE E — CHECK AND GENERATE
+- Check that every applicant has a separate full profile; use
+  applicant_metadata.label and visa_completed: false in each one.
+- If one traveller has different dates, contacts, nationality or
+  occupation, reflect those differences without altering others.
+- Return one contiguous YAML stream with --- on its own line
+  before each complete applicant; nothing else.
 
-### Expenses
-43. Intended expenses in USD?
-44. Did you buy travel insurance? (Yes/No) — if Yes, specify the insurer/policy
-45. Who covers trip expenses? (Personal or Company) — also payment method (Cash/Credit card); if Company: company name, address, telephone
-
----
-
-Start with question 1 now.`;
+Start by asking how many people need individual e-Visas, unless I
+already told you the number; then ask the first missing question.
+`;
 
 export const PROFILE_SETUP_STEPS = [
   {
-    title: 'Open the profile editor',
-    body: 'Click "Edit profile" in the extension popup, or open the editor page from the extension options.',
+    title: 'Open applicant profiles',
+    body: 'Open Manage applicants from the Chrome extension popup. Each person has a separate form and YAML profile.',
   },
   {
-    title: 'Fill in your details',
-    body: 'The editor opens with sample John Doe data. Edit the YAML directly, use Reset template for a blank form, or use an LLM with the Q&A prompt on the Instructions tab. Use Add trip to append a visit row at the end of vietnam_visits_last_year.',
+    title: 'Add or import people',
+    body: 'Click New person, Duplicate to reuse a shared itinerary, or Import YAML to paste text or select files. Separate multiple YAML profiles with --- on its own line.',
   },
   {
-    title: 'Save',
-    body: 'Click Save to store your profile in the extension. The autofill script reads from saved storage first.',
+    title: 'Fill in and save details',
+    body: 'Use the grouped form fields and Save applicant. Under Advanced you can open the original raw YAML editor, load an example, reset to a blank template or export one person.',
   },
   {
-    title: 'Optional: export profile.yaml',
-    body: 'Use Download to save profile.yaml to your computer for backup or version control.',
+    title: 'Generate YAML with an AI assistant',
+    body: 'Use the LLM Q&A Prompt tab and Copy prompt. The multi-applicant prompt asks shared trip details once, then each person’s details. Import the combined YAML with --- separators in Applicant profiles.',
+  },
+  {
+    title: 'Optional backup or encrypted sync',
+    body: 'Export all applicants to a YAML backup. Use the separate Sync tab for optional, password-protected Chrome Sync; every browser must use the same extension ID.',
   },
   {
     title: 'Use on the e-Visa site',
-    body: 'Open the foreigners form at evisa.gov.vn, pick your entry date in the popup, then click Fill Form.',
+    body: 'Open the foreigners form at evisa.gov.vn, choose the correct applicant and entry date in the popup, click Fill Form, review every field, and submit manually.',
   },
 ];

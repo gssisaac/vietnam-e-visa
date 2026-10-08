@@ -16,12 +16,26 @@ export function formatVisaRange(entryIso: string, stayDays: number): string {
   return `e-Visa valid: ${validFrom} → ${validTo} (${stayDays} days)`;
 }
 
-export function isForeignersUrl(url: string | undefined): boolean {
+/** Map the historical leisure entry reason to the currently offered label. */
+export function normalizePurposeOfEntry(value: unknown): unknown {
+  return typeof value === 'string' && value.trim().toLowerCase() === 'tourism'
+    ? 'Tourist'
+    : value;
+}
+
+/** Only the official HTTPS Vietnam e-Visa origin may reveal stored applicant data. */
+export function isEvisaSiteUrl(url: string | undefined): boolean {
   if (!url) return false;
   try {
-    const { hostname, pathname } = new URL(url);
-    return hostname.endsWith('evisa.gov.vn') && pathname.includes('/e-visa/foreigners');
+    const parsed = new URL(url);
+    return parsed.protocol === 'https:' && parsed.hostname === 'evisa.gov.vn';
   } catch {
-    return url.includes('evisa.gov.vn') && url.includes('/e-visa/foreigners');
+    return false;
   }
+}
+
+export function isForeignersUrl(url: string | undefined): boolean {
+  if (!isEvisaSiteUrl(url)) return false;
+  const { pathname } = new URL(url!);
+  return pathname === '/e-visa/foreigners' || pathname.startsWith('/e-visa/foreigners/');
 }

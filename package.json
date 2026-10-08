@@ -1,6 +1,6 @@
 {
   "name": "vietnam-e-visa-autofill",
-  "version": "1.0.0",
+  "version": "1.3.2",
   "description": "Chrome extension that auto-fills the Vietnam e-Visa application form from a YAML profile",
   "type": "module",
   "license": "MIT",
@@ -28,11 +28,12 @@
   "packageManager": "pnpm@11.1.2",
   "scripts": {
     "dev": "vite",
-    "prebuild": "node scripts/optimize-icons.js",
     "build": "vite build",
+    "check:release": "node scripts/check-release.mjs",
+    "test": "node tests/profile-storage.cjs",
     "preview": "vite preview",
     "clean": "rm -rf dist",
-    "package": "pnpm build && node scripts/package-release.js",
+    "package": "pnpm build && pnpm check:release && node scripts/package-release.js",
     "release": "pnpm package && node scripts/github-release.js",
     "fetch-options": "node scripts/fetch-options.js"
   },

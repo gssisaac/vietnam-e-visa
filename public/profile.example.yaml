@@ -1,3 +1,7 @@
+# Local applicant checklist. Does not indicate government visa approval.
+applicant_metadata:
+  visa_completed: false
+
 # Example profile with sample values (not real data).
 # For a blank template use profile.form.yaml. Your live data goes in profile.yaml.
 
@@ -52,7 +56,7 @@ occupation:
   company_phone: "+82-2-1234-5678"
 
 trip_information:
-  purpose_of_entry: "Tourism"
+  purpose_of_entry: "Tourist"
   intended_entry_date: "05/06/2026"
   length_of_stay_days: "25"
   phone_in_vietnam: "+84-90-123-4567"

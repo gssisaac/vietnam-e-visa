@@ -5,8 +5,11 @@ type StackFrame = { indent: number; value: YamlMap | YamlList; type: 'map' | 'li
 function stripInlineComment(raw: string): string {
   let inSingle = false;
   let inDouble = false;
+  let escaped = false;
   for (let i = 0; i < raw.length; i += 1) {
     const ch = raw[i];
+    if (ch === '\\' && inDouble && !escaped) { escaped = true; continue; }
+    if (escaped) { escaped = false; continue; }
     if (ch === '"' && !inSingle) inDouble = !inDouble;
     if (ch === "'" && !inDouble) inSingle = !inSingle;
     if (ch === '#' && !inSingle && !inDouble) {
@@ -22,7 +25,8 @@ function stripInlineComment(raw: string): string {
 function parseScalar(raw: string): unknown {
   raw = stripInlineComment(raw.trim());
   if ((raw.startsWith('"') && raw.endsWith('"')) || (raw.startsWith("'") && raw.endsWith("'"))) {
-    return raw.slice(1, -1);
+    if (raw[0] === '"') { try { return JSON.parse(raw); } catch { return raw.slice(1, -1); } }
+    return raw.slice(1, -1).replace(/''/g, "'");
   }
   if (raw === 'true') return true;
   if (raw === 'false') return false;
@@ -70,7 +74,7 @@ export function parseYaml(text: string): YamlMap {
         const obj: YamlMap = {};
         (ctx.value as YamlList).push(obj);
         stack.push({ indent, value: obj, type: 'map' });
-      } else if (itemText.includes(':')) {
+      } else if (/^[A-Za-z_][A-Za-z0-9_-]*:/.test(itemText)) {
         const obj = parseKeyValue(itemText);
         (ctx.value as YamlList).push(obj);
         if (typeof obj === 'object' && obj !== null && !Array.isArray(obj)) {
@@ -107,3 +111,51 @@ export function parseYaml(text: string): YamlMap {
 }
 
 export type VisaProfile = ReturnType<typeof parseYaml>;
+
+
+/** Serialize form data to the YAML format consumed by the existing autofill parser.
+ * Strings are JSON-quoted (a YAML-compatible subset) to preserve passport numbers,
+ * dates, special characters, colons, and leading zeroes.
+ */
+export function stringifyYaml(value: YamlMap): string {
+  function scalar(input: unknown): string {
+    if (typeof input === 'boolean') return String(input);
+    if (input === null || input === undefined) return '""';
+    return JSON.stringify(String(input));
+  }
+
+  function entries(map: YamlMap, indent: number): string[] {
+    const lines: string[] = [];
+    const prefix = ' '.repeat(indent);
+    for (const [key, child] of Object.entries(map)) {
+      if (Array.isArray(child)) {
+        if (!child.length) {
+          lines.push(prefix + key + ': []');
+        } else {
+          lines.push(prefix + key + ':');
+          for (const element of child) {
+            if (element && typeof element === 'object' && !Array.isArray(element)) {
+              const nested = entries(element as YamlMap, indent + 4);
+              if (nested.length) {
+                lines.push(prefix + '  - ' + nested[0].trimStart());
+                lines.push(...nested.slice(1));
+              } else {
+                lines.push(prefix + '  - ""');
+              }
+            } else {
+              lines.push(prefix + '  - ' + scalar(element));
+            }
+          }
+        }
+      } else if (child && typeof child === 'object') {
+        lines.push(prefix + key + ':');
+        lines.push(...entries(child as YamlMap, indent + 2));
+      } else {
+        lines.push(prefix + key + ': ' + scalar(child));
+      }
+    }
+    return lines;
+  }
+
+  return entries(value, 0).join('\n') + '\n';
+}

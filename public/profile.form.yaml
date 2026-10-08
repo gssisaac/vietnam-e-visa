@@ -1,5 +1,10 @@
 # Blank form template — copy to profile.yaml and fill in your details.
 
+# Local checklist status. Does not indicate official visa approval.
+applicant_metadata:
+  visa_completed: false
+
+
 personal_information:
   surname: ""
   given_name: ""

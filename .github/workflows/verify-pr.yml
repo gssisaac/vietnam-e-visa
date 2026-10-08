@@ -1,0 +1,33 @@
+name: Verify extension
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches:
+      - 'feature/**'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.1.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Unit tests
+        run: pnpm test
+      - name: Type-check
+        run: pnpm exec tsc --noEmit
+      - name: Build
+        run: pnpm build
+      - name: Verify production bundle
+        run: pnpm check:release

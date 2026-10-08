@@ -50,7 +50,11 @@ async function main() {
   ]);
 
   const nationalities = qt.data.map((x) => x.tenQTEn || x.TenQTEn).filter(Boolean).sort();
-  const purposes = [...new Set(md.data.map((x) => x.TenMDEn).filter(Boolean))].sort();
+  // The reference API still exposes "Tourism", which is no longer a selectable
+  // entry in the current visa form. "Tourist" is the correct leisure option.
+  const purposes = [...new Set(md.data.map((x) => x.TenMDEn).filter(Boolean))]
+    .filter((label) => label !== 'Tourism')
+    .sort();
   const borderGatesEntry = ckEntry.data.map((x) => x.tenCKEn).filter(Boolean).sort();
   const borderGatesExit = ckExit.data.map((x) => x.tenCKEn).filter(Boolean).sort();
   const provinces = tinh.data.map((x) => x.tenTTEn).filter(Boolean).sort();

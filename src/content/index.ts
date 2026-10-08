@@ -70,9 +70,9 @@ const TARGET_PATH = '/e-visa/foreigners';
     }, 500);
   }
 
-  async function loadProfile() {
+  async function loadProfile(profileId: string) {
     log().debug('loading profile');
-    const text = await loadProfileYaml();
+    const text = await loadProfileYaml(profileId);
     const profile = parseYaml(text);
     log().debug('profile loaded', Object.keys(profile));
     return profile;
@@ -126,8 +126,10 @@ const TARGET_PATH = '/e-visa/foreigners';
     };
   }
 
-  async function handleFillForm(entryDateIso: string) {
+  async function handleFillForm(entryDateIso: string, profileId: string) {
     log().info('handleFillForm called', { entryDateIso });
+
+    if (!profileId) return { ok: false, error: 'Choose an applicant in the extension popup.' };
 
     if (!entryDateIso) {
       return { ok: false, error: 'Entry date is required. Open the extension popup and select a date.' };
@@ -147,7 +149,7 @@ const TARGET_PATH = '/e-visa/foreigners';
     }
 
     try {
-      const profile = await loadProfile();
+      const profile = await loadProfile(profileId);
       const appliedDates = applyEntryDate(profile, entryDateIso);
       const result = await fillForm(profile);
       return { ok: true, result: { ...result, appliedDates } };
@@ -177,7 +179,7 @@ const TARGET_PATH = '/e-visa/foreigners';
     }
 
     if (message.action === 'fillForm') {
-      handleFillForm(message.entryDate)
+      handleFillForm(message.entryDate, message.profileId)
         .then(sendResponse)
         .catch((err) => {
           const messageText = err instanceof Error ? err.message : String(err);
